@@ -27,12 +27,10 @@ interface AIAnswer {
 }
 
 interface SSEData {
-  type: "questionId" | "answer";
+  type?: string;
   questionId?: number;
-  aiId?: string;
-  aiName?: string;
+  model?: "GPT" | "Gemini" | "Perplexity";
   content?: string;
-  isComplete?: boolean;
 }
 
 const AI_LOGOS: Record<string, string> = {
@@ -67,11 +65,22 @@ export default function AnswerPage() {
   const [isConnecting, setIsConnecting] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const EXPECTED_AI_COUNT = 3;
+  const answerCountRef = useRef(0);
+
+  useEffect(() => {
+    const count = Number(sessionStorage.getItem("retryCount") || "0");
+    setRetryCount(count);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedNickname = sessionStorage.getItem("nickname");
-      const storedPhonenumber = sessionStorage.getItem("phoneNumber");
+      const storedPhonenumber = sessionStorage.getItem("phonenumber");
+      console.log("phone from storage:", storedPhonenumber);
+
       const storedQuestion = sessionStorage.getItem("question");
 
       if (!storedNickname || !storedQuestion) {
@@ -96,7 +105,7 @@ export default function AnswerPage() {
 
       eventSource.onmessage = (event) => {
         try {
-          const data = JSON.parse(event.data);
+          const data = JSON.parse(event.data) as SSEData;
 
           // 1️⃣ INIT 처리
           if (data.type === "INIT" && data.questionId) {
@@ -106,15 +115,14 @@ export default function AnswerPage() {
           }
 
           // 2️⃣ ANSWER 처리 (백엔드는 content만 옴)
-          if (data.content) {
+          if (data.content && data.model) {
             setAnswers((prev) => {
-              const nextIndex = prev.length + 1;
-
+              answerCountRef.current = prev.length + 1;
               return [
                 ...prev,
                 {
-                  id: `ai-${nextIndex}`,
-                  name: `AI ${nextIndex}`, // 👉 GPT / Gemini / Perplexity 나중에 매핑
+                  id: `${data.model}-${prev.length}`,
+                  name: data.model,
                   content: data.content,
                   isComplete: true,
                 },
@@ -127,6 +135,10 @@ export default function AnswerPage() {
       };
 
       eventSource.onerror = () => {
+        if (answerCountRef.current >= EXPECTED_AI_COUNT) {
+          eventSource.close();
+          return;
+        }
         setError("연결이 끊어졌습니다. 페이지를 새로고침 해주세요.");
         eventSource.close();
       };
@@ -148,7 +160,6 @@ export default function AnswerPage() {
   };
 
   const completedAnswers = answers.filter((a) => a.isComplete).length;
-  const EXPECTED_AI_COUNT = 3;
   const allAnswersComplete = completedAnswers === EXPECTED_AI_COUNT;
 
   const getAILogo = (name: string) => {
@@ -169,6 +180,12 @@ export default function AnswerPage() {
     return "from-aiq-green to-aiq-green-dark";
   };
 
+  const handleRetry = () => {
+    const nextCount = retryCount + 1;
+    sessionStorage.setItem("retryCount", String(nextCount));
+    router.push("/question");
+  };
+
   return (
     <TooltipProvider>
       <main className="min-h-screen bg-gradient-to-b from-aiq-gray-light to-white flex flex-col">
@@ -179,7 +196,7 @@ export default function AnswerPage() {
           <div className="flex items-center gap-2 text-sm text-aiq-gray">
             <span className="flex items-center gap-1">
               <Bot className="w-4 h-4" />
-              {completedAnswers}/3 완료
+              {completedAnswers}/{EXPECTED_AI_COUNT} 완료
             </span>
           </div>
         </header>
@@ -315,16 +332,10 @@ export default function AnswerPage() {
       </main>
 
       {/* Floating Re-ask Button */}
-      {allAnswersComplete && (
+      {allAnswersComplete && retryCount === 0 && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              onClick={() => router.push("/question")}
-              className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-aiq-green hover:bg-aiq-green-dark text-white shadow-lg hover:shadow-xl transition-all duration-300 animate-bounce"
-              size="icon"
-            >
-              <RotateCcw className="w-6 h-6" />
-            </Button>
+            <Button onClick={handleRetry} />
           </TooltipTrigger>
           <TooltipContent>
             <p>1번 더 재질문 할 수 있어요!</p>
