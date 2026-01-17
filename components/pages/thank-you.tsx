@@ -1,28 +1,32 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function ThankYouPage() {
-  const navigate = useNavigate()
-  const [nickname, setNickname] = useState("")
+  const router = useRouter();
+  const [nickname, setNickname] = useState("");
 
   useEffect(() => {
-    const storedNickname = sessionStorage.getItem("nickname")
-    if (storedNickname) {
-      setNickname(storedNickname)
+    if (typeof window !== "undefined") {
+      const storedNickname = sessionStorage.getItem("nickname");
+      if (storedNickname) {
+        setNickname(storedNickname);
+      }
     }
 
     // sessionStorage 클리어 (테스트 완료)
     setTimeout(() => {
-      sessionStorage.clear()
-    }, 1000)
-  }, [])
+      if (typeof window !== "undefined") {
+        sessionStorage.clear();
+      }
+    }, 1000);
+  }, []);
 
   const handleRestart = () => {
-    navigate("/")
-  }
+    router.push("/");
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-aiq-green-light via-white to-aiq-gray-light flex flex-col items-center justify-center p-4 relative overflow-hidden">
@@ -34,19 +38,30 @@ export default function ThankYouPage() {
 
       <div className="relative z-10 w-full max-w-md text-center">
         <div className="flex justify-center mb-6 animate-fade-in">
-          <h1 className="text-4xl font-black text-aiq-green tracking-tight">AIQ</h1>
+          <h1 className="text-4xl font-black text-aiq-green tracking-tight">
+            AIQ
+          </h1>
         </div>
 
         <div className="flex justify-center mb-8 animate-fade-in-up delay-100">
           <img
             src="/images/aiq-character.png"
             alt="AIQ Character"
-            className="w-44 h-auto object-contain drop-shadow-xl animate-float"
+            className="w-36 h-auto object-contain drop-shadow-xl animate-float"
           />
         </div>
 
         <div className="bg-white rounded-3xl shadow-xl p-8 border border-aiq-green/20 animate-fade-in-up delay-200">
-          <h1 className="text-2xl font-bold text-aiq-black mb-3">{nickname ? `${nickname}님, ` : ""}감사합니다!</h1>
+          <h1 className="text-2xl font-bold text-aiq-black mb-3">
+            {nickname ? (
+              <>
+                <span className="text-aiq-green">{nickname}</span>님,{" "}
+              </>
+            ) : (
+              ""
+            )}
+            감사합니다!
+          </h1>
 
           <p className="text-aiq-gray mb-6 leading-relaxed">
             AIQ MVP 테스터로 참여해주셔서 정말 감사합니다.
@@ -55,7 +70,9 @@ export default function ThankYouPage() {
           </p>
 
           <div className="bg-aiq-green-light rounded-xl p-4 mb-6">
-            <p className="text-aiq-green-dark text-sm font-medium">정식 출시 시 가장 먼저 알려드릴게요!</p>
+            <p className="text-aiq-green-dark text-sm font-medium">
+              정식 출시 시 가장 먼저 알려드릴게요!
+            </p>
           </div>
 
           {/* Action Buttons */}
@@ -67,13 +84,17 @@ export default function ThankYouPage() {
               다시 테스트하기
             </Button>
 
-            <p className="text-xs text-aiq-gray">문의: aiq.official@gmail.com</p>
+            <p className="text-xs text-aiq-gray">
+              문의: aiq.official@gmail.com
+            </p>
           </div>
         </div>
 
         {/* Footer */}
-        <p className="mt-8 text-sm text-aiq-gray animate-fade-in delay-400">AIQ - AI와 함께하는 새로운 경험</p>
+        <p className="mt-8 text-sm text-aiq-gray animate-fade-in delay-400">
+          AIQ - AI와 함께하는 새로운 경험
+        </p>
       </div>
     </main>
-  )
+  );
 }

@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bb02ebcc-22c2-4fb5-baca-b54fcde4faaa" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/public/images/aiq-character.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -85,7 +85,7 @@
       <option name="presentableId" value="Default" />
       <updated>1768642324971</updated>
       <workItem from="1768642327772" duration="43000" />
-      <workItem from="1768642414381" duration="1019000" />
+      <workItem from="1768642414381" duration="1421000" />
     </task>
     <servers />
   </component>

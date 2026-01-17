@@ -1,55 +1,67 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
+import type React from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function RegisterPage() {
-  const navigate = useNavigate()
-  const [nickname, setNickname] = useState("")
-  const [phonenumber, setPhonenumber] = useState("")
-  const [check1, setCheck1] = useState(false)
-  const [check2, setCheck2] = useState(false)
-  const [errors, setErrors] = useState<{ nickname?: string; checkbox?: string }>({})
+  const router = useRouter();
+  const [nickname, setNickname] = useState("");
+  const [phonenumber, setPhonenumber] = useState("");
+  const [check1, setCheck1] = useState(false);
+  const [check2, setCheck2] = useState(false);
+  const [errors, setErrors] = useState<{
+    nickname?: string;
+    checkbox?: string;
+  }>({});
 
   const validateForm = () => {
-    const newErrors: { nickname?: string; checkbox?: string } = {}
+    const newErrors: { nickname?: string; checkbox?: string } = {};
 
     if (!nickname.trim()) {
-      newErrors.nickname = "이름을 입력해주세요"
+      newErrors.nickname = "이름을 입력해주세요";
     }
 
     if (!check1 || !check2) {
-      newErrors.checkbox = "위의 해당사항을 충족해야 참여할 수 있습니다."
+      newErrors.checkbox = "위의 해당사항을 충족해야 참여할 수 있습니다.";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleNext = () => {
     if (validateForm()) {
-      sessionStorage.setItem("nickname", nickname)
-      sessionStorage.setItem("phonenumber", phonenumber.replace(/-/g, "") || "")
-      navigate("/question")
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("nickname", nickname);
+        sessionStorage.setItem(
+          "phonenumber",
+          phonenumber.replace(/-/g, "") || ""
+        );
+      }
+      router.push("/question");
     }
-  }
+  };
 
   const formatPhoneNumber = (value: string) => {
-    const numbers = value.replace(/[^0-9]/g, "")
-    if (numbers.length <= 3) return numbers
-    if (numbers.length <= 7) return `${numbers.slice(0, 3)}-${numbers.slice(3)}`
-    return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`
-  }
+    const numbers = value.replace(/[^0-9]/g, "");
+    if (numbers.length <= 3) return numbers;
+    if (numbers.length <= 7)
+      return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+    return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(
+      7,
+      11
+    )}`;
+  };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatPhoneNumber(e.target.value)
-    setPhonenumber(formatted)
-  }
+    const formatted = formatPhoneNumber(e.target.value);
+    setPhonenumber(formatted);
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-aiq-gray-light to-white flex flex-col items-center justify-center p-4">
@@ -61,20 +73,26 @@ export default function RegisterPage() {
 
       <div className="relative z-10 w-full max-w-md">
         <div className="flex justify-center mb-6 animate-fade-in">
-          <h1 className="text-5xl font-black text-aiq-green tracking-tight">AIQ</h1>
+          <h1 className="text-5xl font-black text-aiq-green tracking-tight">
+            AIQ
+          </h1>
         </div>
 
         <div className="flex justify-center mb-8 animate-fade-in-up delay-100">
           <img
             src="/images/aiq-character.png"
             alt="AIQ Character"
-            className="w-44 h-auto object-contain drop-shadow-lg animate-float"
+            className="w-36 h-auto object-contain drop-shadow-lg animate-float"
           />
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-border animate-fade-in-up delay-200">
-          <h1 className="text-2xl font-bold text-center text-aiq-black mb-2">MVP 테스터 모집</h1>
-          <p className="text-aiq-gray text-center mb-6">AIQ의 첫 번째 테스터가 되어주세요!</p>
+          <h1 className="text-2xl font-bold text-center text-aiq-black mb-2">
+            MVP 테스터 모집
+          </h1>
+          <p className="text-aiq-gray text-center mb-6">
+            AIQ의 첫 번째 테스터가 되어주세요!
+          </p>
 
           <div className="space-y-4">
             <div className="space-y-2">
@@ -91,12 +109,22 @@ export default function RegisterPage() {
                   errors.nickname ? "border-destructive" : "border-border"
                 }`}
               />
-              {errors.nickname && <p className="text-sm text-destructive animate-fade-in">{errors.nickname}</p>}
+              {errors.nickname && (
+                <p className="text-sm text-destructive animate-fade-in">
+                  {errors.nickname}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phonenumber" className="text-aiq-black font-medium">
-                전화번호 <span className="text-aiq-gray text-sm font-normal">(선택)</span>
+              <Label
+                htmlFor="phonenumber"
+                className="text-aiq-black font-medium"
+              >
+                전화번호{" "}
+                <span className="text-aiq-gray text-sm font-normal">
+                  (선택)
+                </span>
               </Label>
               <Input
                 id="phonenumber"
@@ -108,7 +136,9 @@ export default function RegisterPage() {
               />
               <div className="bg-aiq-green-light/50 rounded-lg p-3 mt-2">
                 <p className="text-xs text-aiq-green-dark leading-relaxed">
-                  <span className="font-semibold">* 추첨을 통해 스타벅스 기프티콘을 제공해 드립니다.</span>
+                  <span className="font-semibold">
+                    * 추첨을 통해 스타벅스 기프티콘을 제공해 드립니다.
+                  </span>
                   <br />
                   이벤트에 참여하실 분은 전화번호를 반드시 작성해 주세요.
                 </p>
@@ -123,8 +153,12 @@ export default function RegisterPage() {
                   onCheckedChange={(checked) => setCheck1(checked as boolean)}
                   className="mt-0.5 data-[state=checked]:bg-aiq-green data-[state=checked]:border-aiq-green"
                 />
-                <Label htmlFor="check1" className="text-sm text-aiq-black leading-relaxed cursor-pointer">
-                  작년/재작년 기준 2회 이상 중·고가(몇십~몇백만원) 제품을 구매하셨나요?
+                <Label
+                  htmlFor="check1"
+                  className="text-sm text-aiq-black leading-relaxed cursor-pointer"
+                >
+                  작년/재작년 기준 2회 이상 중·고가(몇십~몇백만원) 제품을
+                  구매하셨나요?
                 </Label>
               </div>
 
@@ -135,14 +169,24 @@ export default function RegisterPage() {
                   onCheckedChange={(checked) => setCheck2(checked as boolean)}
                   className="mt-0.5 data-[state=checked]:bg-aiq-green data-[state=checked]:border-aiq-green"
                 />
-                <Label htmlFor="check2" className="text-sm text-aiq-black leading-relaxed cursor-pointer">
-                  GPT / Gemini / Perplexity 중 2개 이상 사용해서 쇼핑 견적이나 제품을 선택한 경험이 있으신가요?
+                <Label
+                  htmlFor="check2"
+                  className="text-sm text-aiq-black leading-relaxed cursor-pointer"
+                >
+                  GPT / Gemini / Perplexity 중 2개 이상 사용해서 쇼핑 견적이나
+                  제품을 선택한 경험이 있으신가요?
                 </Label>
               </div>
 
-              <p className="text-xs text-aiq-gray mt-2">*위 조건에 부합하신 분만 테스트에 참여해 주세요</p>
+              <p className="text-xs text-aiq-gray mt-2">
+                *위 조건에 부합하신 분만 테스트에 참여해 주세요
+              </p>
 
-              {errors.checkbox && <p className="text-sm text-destructive animate-fade-in">{errors.checkbox}</p>}
+              {errors.checkbox && (
+                <p className="text-sm text-destructive animate-fade-in">
+                  {errors.checkbox}
+                </p>
+              )}
             </div>
 
             <Button
@@ -153,9 +197,11 @@ export default function RegisterPage() {
             </Button>
           </div>
 
-          <p className="text-xs text-aiq-gray text-center mt-4">테스터 참여 시 개인정보 수집에 동의하게 됩니다</p>
+          <p className="text-xs text-aiq-gray text-center mt-4">
+            테스터 참여 시 개인정보 수집에 동의하게 됩니다
+          </p>
         </div>
       </div>
     </main>
-  )
+  );
 }

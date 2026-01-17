@@ -1,47 +1,53 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Send } from "lucide-react"
-import { LottieLoader } from "@/components/lottie-loader"
+import type React from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Send } from "lucide-react";
+import { LottieLoader } from "@/components/lottie-loader";
 
 export default function QuestionPage() {
-  const navigate = useNavigate()
-  const [question, setQuestion] = useState("")
-  const [nickname, setNickname] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
+  const [question, setQuestion] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const storedNickname = sessionStorage.getItem("nickname")
-    if (!storedNickname) {
-      navigate("/")
-      return
+    if (typeof window !== "undefined") {
+      const storedNickname = sessionStorage.getItem("nickname");
+      if (!storedNickname) {
+        router.push("/");
+        return;
+      }
+      setNickname(storedNickname);
     }
-    setNickname(storedNickname)
-  }, [navigate])
+  }, [router]);
 
   const handleSubmit = () => {
-    if (!question.trim()) return
+    if (!question.trim()) return;
 
-    setIsLoading(true)
-    sessionStorage.setItem("question", question)
-    navigate("/answer")
-  }
+    setIsLoading(true);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("question", question);
+    }
+    router.push("/answer");
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSubmit()
+      e.preventDefault();
+      handleSubmit();
     }
-  }
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-aiq-gray-light to-white flex flex-col">
       <header className="flex items-center justify-between p-4 border-b border-border bg-white/80 backdrop-blur-sm animate-fade-in">
-        <h1 className="text-2xl font-black text-aiq-green tracking-tight">AIQ</h1>
+        <h1 className="text-2xl font-black text-aiq-green tracking-tight">
+          AIQ
+        </h1>
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-aiq-green flex items-center justify-center text-white text-sm font-medium">
             {nickname.charAt(0)}
@@ -56,15 +62,17 @@ export default function QuestionPage() {
           <img
             src="/images/aiq-character.png"
             alt="AIQ Character"
-            className="w-36 h-auto object-contain drop-shadow-lg animate-float"
+            className="w-28 h-auto object-contain drop-shadow-lg animate-float"
           />
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg p-6 max-w-md w-full mb-6 relative animate-fade-in-up delay-100">
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[12px] border-b-white" />
-          <h1 className="text-xl font-bold text-aiq-black text-center mb-2">무엇이든 물어보세요!</h1>
+          <h1 className="text-xl font-bold text-aiq-black text-center mb-2">
+            무엇이든 물어보세요!
+          </h1>
           <p className="text-aiq-gray text-center text-sm">
-            3개의 AI가 여러분의 질문에 답변하고, 합의점을 정리해드립니다.
+            필요한 제품을 입력하면 AI가 답변해/찾아 드립니다.
           </p>
         </div>
 
@@ -79,7 +87,9 @@ export default function QuestionPage() {
               disabled={isLoading}
             />
             <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-              <span className="text-xs text-aiq-gray">{question.length} / 500</span>
+              <span className="text-xs text-aiq-gray">
+                {question.length} / 500
+              </span>
               <Button
                 onClick={handleSubmit}
                 disabled={!question.trim() || isLoading}
@@ -107,5 +117,5 @@ export default function QuestionPage() {
         <p className="text-xs text-aiq-gray">AIQ MVP 테스터 프로그램</p>
       </footer>
     </main>
-  )
+  );
 }

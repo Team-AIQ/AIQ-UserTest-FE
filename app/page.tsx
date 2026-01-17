@@ -1,26 +1,8 @@
-"use client"
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
-import RegisterPage from "@/pages/register"
-import QuestionPage from "@/pages/question"
-import AnswerPage from "@/pages/answer"
-import ReportPage from "@/pages/report"
-import FeedbackPage from "@/pages/feedback"
-import ThankYouPage from "@/pages/thank-you"
+"use client";
+import RegisterPage from "@/components/pages/register";
 
-const App = () => {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<RegisterPage />} />
-        <Route path="/question" element={<QuestionPage />} />
-        <Route path="/answer" element={<AnswerPage />} />
-        <Route path="/report" element={<ReportPage />} />
-        <Route path="/feedback" element={<FeedbackPage />} />
-        <Route path="/thank-you" element={<ThankYouPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
-  )
+export const dynamic = "force-dynamic";
+
+export default function Home() {
+  return <RegisterPage />;
 }
-
-export default App

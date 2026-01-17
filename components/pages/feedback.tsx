@@ -1,22 +1,23 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Star, FileText } from "lucide-react"
-import { LottieLoader } from "@/components/lottie-loader"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Star, FileText } from "lucide-react";
+import { LottieLoader } from "@/components/lottie-loader";
 
 function StarRating({
   value,
   onChange,
   label,
 }: {
-  value: number
-  onChange: (v: number) => void
-  label: string
+  value: number;
+  onChange: (v: number) => void;
+  label: string;
 }) {
-  const [hovered, setHovered] = useState(0)
+  const [hovered, setHovered] = useState(0);
 
   return (
     <div className="space-y-2">
@@ -34,80 +35,83 @@ function StarRating({
           >
             <Star
               className={`w-8 h-8 transition-all duration-200 ${
-                star <= (hovered || value) ? "fill-yellow-400 text-yellow-400" : "fill-gray-200 text-gray-200"
+                star <= (hovered || value)
+                  ? "fill-yellow-400 text-yellow-400"
+                  : "fill-gray-200 text-gray-200"
               }`}
             />
           </button>
         ))}
-        {value > 0 && <span className="ml-2 text-sm text-aiq-green self-center">{value}점</span>}
+        {value > 0 && (
+          <span className="ml-2 text-sm text-aiq-green self-center">
+            {value}점
+          </span>
+        )}
       </div>
     </div>
-  )
+  );
 }
 
 export default function FeedbackPage() {
-  const navigate = useNavigate()
-  const [convenienceRating, setConvenienceRating] = useState(0)
-  const [intentionRating, setIntentionRating] = useState(0)
-  const [feedback, setFeedback] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [nickname, setNickname] = useState("")
-  const [phonenumber, setPhonenumber] = useState("")
+  const router = useRouter();
+  const [convenienceRating, setConvenienceRating] = useState(0);
+  const [intentionRating, setIntentionRating] = useState(0);
+  const [feedback, setFeedback] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [nickname, setNickname] = useState("");
+  const [phonenumber, setPhonenumber] = useState("");
+  const [errors, setErrors] = useState<{ ratings?: string }>({});
 
   useEffect(() => {
-    const storedNickname = sessionStorage.getItem("nickname")
-    const storedPhonenumber = sessionStorage.getItem("phonenumber")
+    if (typeof window !== "undefined") {
+      const storedNickname = sessionStorage.getItem("nickname");
+      const storedPhonenumber = sessionStorage.getItem("phoneNumber");
 
-    if (!storedNickname) {
-      navigate("/")
-      return
-    }
-
-    setNickname(storedNickname)
-    setPhonenumber(storedPhonenumber || "")
-  }, [navigate])
-
-  const handleSubmit = async () => {
-    if (convenienceRating === 0 || intentionRating === 0) return
-
-    setIsSubmitting(true)
-
-    try {
-      const response = await fetch("/api/feedback", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nickname,
-          phonenumber,
-          convenienceRating,
-          intentionRating,
-          feedback,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error("피드백 전송 실패")
+      if (!storedNickname) {
+        router.push("/");
+        return;
       }
 
-      navigate("/thank-you")
-    } catch (error) {
-      console.error("피드백 전송 오류:", error)
-      navigate("/thank-you")
+      setNickname(storedNickname);
+      setPhonenumber(storedPhonenumber || "");
     }
-  }
+  }, [router]);
+
+  const handleSubmit = async () => {
+    if (convenienceRating === 0 || intentionRating === 0) {
+      setErrors({ ratings: "모든 항목에 별점을 선택해 주세요" });
+      return;
+    }
+
+    setErrors({});
+    setIsSubmitting(true);
+
+    try {
+      await axios.post("http://localhost:8080/api/feedback", {
+        name: nickname,
+        phoneNumber: phonenumber,
+        convenienceRating,
+        usageIntentRating: intentionRating,
+        comment: feedback,
+      });
+
+      router.push("/thank-you");
+    } catch (error) {
+      console.error("피드백 전송 오류:", error);
+      router.push("/thank-you");
+    }
+  };
 
   const handleViewReport = () => {
-    const questionId = sessionStorage.getItem("questionId")
+    const questionId = sessionStorage.getItem("questionId");
     if (questionId) {
-      navigate(`/report?questionId=${questionId}`)
+      router.push(`/report?questionId=${questionId}`);
     } else {
-      navigate("/report")
+      router.push("/report");
     }
-  }
+  };
 
-  const allRatingsComplete = convenienceRating > 0 && intentionRating > 0
+  const allRatingsComplete = convenienceRating > 0 && intentionRating > 0;
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-aiq-gray-light to-white flex flex-col items-center justify-center p-4">
@@ -122,13 +126,17 @@ export default function FeedbackPage() {
           <img
             src="/images/aiq-character.png"
             alt="AIQ Character"
-            className="w-28 h-auto object-contain drop-shadow-lg animate-float"
+            className="w-24 h-auto object-contain drop-shadow-lg animate-float"
           />
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-6 border border-border animate-fade-in-up delay-100">
-          <h1 className="text-xl font-bold text-center text-aiq-black mb-2">사용자 만족도 조사</h1>
-          <p className="text-aiq-gray text-center text-sm mb-6">{nickname}님의 소중한 피드백을 부탁드려요!</p>
+          <h1 className="text-xl font-bold text-center text-aiq-black mb-2">
+            사용자 만족도 조사
+          </h1>
+          <p className="text-aiq-gray text-center text-sm mb-6">
+            {nickname || "사용자"}님의 소중한 피드백을 부탁드려요!
+          </p>
 
           <div className="space-y-6">
             <StarRating
@@ -144,7 +152,10 @@ export default function FeedbackPage() {
             />
 
             <div className="space-y-2">
-              <label htmlFor="feedback" className="block text-sm font-medium text-aiq-black">
+              <label
+                htmlFor="feedback"
+                className="block text-sm font-medium text-aiq-black"
+              >
                 AIQ의 개선사항을 피드백 해주세요!
               </label>
               <Textarea
@@ -168,7 +179,7 @@ export default function FeedbackPage() {
             {/* 제출 버튼 */}
             <Button
               onClick={handleSubmit}
-              disabled={!allRatingsComplete || isSubmitting}
+              disabled={isSubmitting}
               className="w-full h-12 bg-aiq-green hover:bg-aiq-green-dark text-white font-semibold rounded-xl text-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
@@ -181,12 +192,14 @@ export default function FeedbackPage() {
               )}
             </Button>
 
-            {!allRatingsComplete && (
-              <p className="text-xs text-aiq-gray text-center animate-fade-in">모든 항목에 별점을 선택해 주세요</p>
+            {errors.ratings && (
+              <p className="text-sm text-destructive animate-fade-in text-center">
+                {errors.ratings}
+              </p>
             )}
           </div>
         </div>
       </div>
     </main>
-  )
+  );
 }
