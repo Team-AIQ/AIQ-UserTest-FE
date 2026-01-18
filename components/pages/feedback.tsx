@@ -10,8 +10,8 @@ import { LottieLoader } from "@/components/lottie-loader";
 
 // Axios 인스턴스 설정
 const api = axios.create({
-  baseURL: "http://localhost:8080",
-  headers: { "Content-Type": "application/json" },
+    baseURL: "http://49.247.139.167:8080",
+    headers: { "Content-Type": "application/json" },
 });
 
 function StarRating({
