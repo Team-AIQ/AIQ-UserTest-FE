@@ -47,6 +47,7 @@ export default function ReportPage() {
         }
 
         setReport(data);
+        sessionStorage.setItem("aiq-report", data);
       } catch (err) {
         console.error("보고서 요청 오류:", err);
         setError("AIQ 보고서를 생성하는 중 오류가 발생했습니다.");
@@ -84,6 +85,8 @@ export default function ReportPage() {
       )
     );
   };
+
+  const linkRegex = /\[(.*?)\]\((https?:\/\/[^\s]+)\)/;
 
   const renderMarkdown = (text: string) => {
     return text.split("\n").map((line, i) => {
@@ -131,19 +134,55 @@ export default function ReportPage() {
       }
 
       if (trimmed.startsWith("### ")) {
+        const rawTitle = trimmed.replace(/^###\s*/, "");
+        const isFinalRecommendation = rawTitle.includes("3. 최종 추천");
+
+        if (isFinalRecommendation && rawTitle.includes("|")) {
+          const [left, right] = rawTitle.split("|");
+          const productName = right.replace(/\*\*/g, "").trim();
+
+          return (
+            <h3
+              key={i}
+              className="flex items-center gap-2 text-xl font-extrabold mt-10 mb-5 text-indigo-600"
+            >
+              <span className="text-yellow-400">⭐</span>
+              <span>{left.trim()} |</span>
+              <span className="text-red-500 font-extrabold">{productName}</span>
+            </h3>
+          );
+        }
+
         return (
           <h3 key={i} className="text-sm font-bold mt-5 mb-2 text-aiq-green">
-            {trimmed.replace(/^###\s*/, "")}
+            {parseBold(rawTitle)}
           </h3>
         );
       }
 
       if (trimmed.startsWith("- ") || /^\d+\./.test(trimmed)) {
+        const content = trimmed.replace(/^- |\d+\. /, "");
+        const linkMatch = content.match(linkRegex);
+
         return (
           <div key={i} className="flex gap-2 ml-1 my-1.5">
             <span>•</span>
             <span className="flex-1">
-              {parseBold(trimmed.replace(/^- |\d+\. /, ""))}
+              {linkMatch ? (
+                <>
+                  {parseBold(content.replace(linkMatch[0], "").trim())}
+                  <a
+                    href={linkMatch[2]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-1 text-blue-600 underline underline-offset-4 font-medium"
+                  >
+                    {linkMatch[1]}
+                  </a>
+                </>
+              ) : (
+                parseBold(content)
+              )}
             </span>
           </div>
         );
