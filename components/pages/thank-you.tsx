@@ -1,100 +1,123 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import axios from "axios"; // 1. api 에러 해결을 위해 axios 임포트
 
 export default function ThankYouPage() {
-  const router = useRouter();
-  const [nickname, setNickname] = useState("");
+    const router = useRouter(); // 2. handleRestart 에러 해결을 위한 router 선언
+    const [nickname, setNickname] = useState("");
+    const isFetched = useRef(false); // 3. useRef 에러 해결 (상단 import 확인 필수)
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedNickname = sessionStorage.getItem("nickname");
-      if (storedNickname) {
-        setNickname(storedNickname);
-      }
-    }
+    // 설문 데이터 상태 (이전 페이지에서 정보를 못 가져올 경우를 대비한 초기값)
+    const [stars1, setStars1] = useState(0);
+    const [stars2, setStars2] = useState(0);
+    const [textFeedback, setTextFeedback] = useState("");
 
-    // sessionStorage 클리어 (테스트 완료)
-    setTimeout(() => {
-      if (typeof window !== "undefined") {
-        sessionStorage.clear();
-      }
-    }, 1000);
-  }, []);
+    // axios 인스턴스 설정 (api 에러 해결)
+    const api = axios.create({
+        baseURL: "http://localhost:8080",
+        headers: { "Content-Type": "application/json" },
+    });
 
-  const handleRestart = () => {
-    router.push("/");
-  };
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            const storedNickname = sessionStorage.getItem("nickname");
+            if (storedNickname) setNickname(storedNickname);
 
-  return (
-    <main className="min-h-screen bg-gradient-to-b from-aiq-green-light via-white to-aiq-gray-light flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 w-32 h-32 bg-aiq-green/20 rounded-full blur-3xl animate-pulse-soft" />
-        <div className="absolute bottom-10 right-10 w-40 h-40 bg-aiq-green/15 rounded-full blur-3xl animate-pulse-soft delay-300" />
-        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-aiq-green/10 rounded-full blur-2xl animate-pulse-soft delay-500" />
-      </div>
+            // 이전 페이지에서 넘어온 데이터가 있다면 세팅
+            setStars1(Number(sessionStorage.getItem("stars1") || 0));
+            setStars2(Number(sessionStorage.getItem("stars2") || 0));
+            setTextFeedback(sessionStorage.getItem("textFeedback") || "");
+        }
+    }, []);
 
-      <div className="relative z-10 w-full max-w-md text-center">
-        <div className="flex justify-center mb-6 animate-fade-in">
-          <h1 className="text-4xl font-black text-aiq-green tracking-tight">
-            AIQ
-          </h1>
-        </div>
+    // 4. 다시 테스트하기 버튼 함수
+    const handleRestart = () => {
+        try {
+            // sessionStorage.clear(); // 데이터 초기화
+            router.push("/question"); // 메인 페이지로 이동
+        } catch (error) {
+            console.error("Restart Error:", error);
+        }
+    };
 
-        <div className="flex justify-center mb-8 animate-fade-in-up delay-100">
-          <img
-            src="/images/aiq-character.png"
-            alt="AIQ Character"
-            className="w-36 h-auto object-contain drop-shadow-xl animate-float"
-          />
-        </div>
+    // 5. 피드백 제출 함수 (요청하신 형식 적용)
+    const handleSubmit = async () => {
+        if (isFetched.current) return;
 
-        <div className="bg-white rounded-3xl shadow-xl p-8 border border-aiq-green/20 animate-fade-in-up delay-200">
-          <h1 className="text-2xl font-bold text-aiq-black mb-3">
-            {nickname ? (
-              <>
-                <span className="text-aiq-green">{nickname}</span>님,{" "}
-              </>
-            ) : (
-              ""
-            )}
-            감사합니다!
-          </h1>
+        const storedNickname = sessionStorage.getItem("nickname");
+        const storedPhoneNumber = sessionStorage.getItem("phonenumber"); // handleNext에서 저장한 키값
 
-          <p className="text-aiq-gray mb-6 leading-relaxed">
-            AIQ MVP 테스터로 참여해주셔서 정말 감사합니다.
-            <br />
-            피드백은 AIQ 발전에 큰 도움이 됩니다.
-          </p>
+        console.log("세션에서 가져온 번호:", storedPhoneNumber);
+        if (!storedPhoneNumber) {
+            alert("사용자 정보가 없습니다. 처음부터 다시 시도해주세요.");
+            return;
+        }
 
-          <div className="bg-aiq-green-light rounded-xl p-4 mb-6">
-            <p className="text-aiq-green-dark text-sm font-medium">
-              정식 출시 시 가장 먼저 알려드릴게요!
-            </p>
-          </div>
+        try {
+            isFetched.current = true;
 
-          {/* Action Buttons */}
-          <div className="space-y-3">
-            <Button
-              onClick={handleRestart}
-              className="w-full h-12 bg-aiq-green hover:bg-aiq-green-dark text-white font-semibold rounded-xl text-base transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
-            >
-              다시 테스트하기
-            </Button>
+            const feedbackData = {
+                name: storedNickname,
+                phoneNumber: storedPhoneNumber,
+                convenienceRating: stars1,
+                usageIntentRating: stars2,
+                comment: textFeedback
+            };
 
-            <p className="text-xs text-aiq-gray">
-              문의: aiq.official@gmail.com
-            </p>
-          </div>
-        </div>
+            const response = await api.post("/api/feedback", feedbackData);
 
-        {/* Footer */}
-        <p className="mt-8 text-sm text-aiq-gray animate-fade-in delay-400">
-          AIQ - AI와 함께하는 새로운 경험
-        </p>
-      </div>
-    </main>
-  );
+            if (response.status === 200 || response.status === 201) {
+                alert("피드백이 성공적으로 전달되었습니다!");
+                sessionStorage.clear();
+            }
+        } catch (error) {
+            isFetched.current = false;
+            console.error("제출 실패:", error);
+            alert("전송 중 오류가 발생했습니다.");
+        }
+    };
+
+    return (
+        <main className="min-h-screen bg-gradient-to-b from-aiq-green-light via-white to-aiq-gray-light flex flex-col items-center justify-center p-4 relative overflow-hidden">
+            {/* 배경 디자인 UI */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-10 left-10 w-32 h-32 bg-aiq-green/20 rounded-full blur-3xl animate-pulse-soft" />
+                <div className="absolute bottom-10 right-10 w-40 h-40 bg-aiq-green/15 rounded-full blur-3xl animate-pulse-soft delay-300" />
+            </div>
+
+            <div className="relative z-10 w-full max-w-md text-center">
+                <div className="flex justify-center mb-6 animate-fade-in">
+                    <h1 className="text-4xl font-black text-aiq-green tracking-tight">AIQ</h1>
+                </div>
+
+                <div className="flex justify-center mb-8 animate-fade-in-up delay-100">
+                    <img src="/images/aiq-character.png" alt="AIQ Character" className="w-36 h-auto object-contain animate-float" />
+                </div>
+
+                <div className="bg-white rounded-3xl shadow-xl p-8 border border-aiq-green/20 animate-fade-in-up delay-200">
+                    <h2 className="text-2xl font-bold text-aiq-black mb-3">
+                        {nickname ? <><span className="text-aiq-green">{nickname}</span>님, </> : ""}감사합니다!
+                    </h2>
+
+                    <p className="text-aiq-gray mb-6 leading-relaxed">
+                        AIQ MVP 테스터로 참여해주셔서 감사합니다.<br />
+                        피드백은 서비스 발전에 큰 도움이 됩니다.
+                    </p>
+
+                    <div className="space-y-3">
+                        {/* 제출 버튼이 따로 없다면, 여기서 자동으로 handleSubmit을 호출하거나 버튼을 추가해야 합니다 */}
+                        <Button
+                            onClick={handleRestart}
+                            className="w-full h-12 bg-aiq-green hover:bg-aiq-green-dark text-white font-semibold rounded-xl transition-all"
+                        >
+                            다시 테스트하기
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    );
 }
