@@ -1,48 +1,23 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import Lottie from "lottie-react";
+import animationData from "@/public/loading.json";
 
-interface LottieLoaderProps {
+interface Props {
   size?: number;
-  className?: string;
 }
 
-export default function LottieLoaderClient({
-  size = 80,
-  className = "",
-}: LottieLoaderProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const animationRef = useRef<any>(null);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      import("lottie-web").then((lottie) => {
-        if (containerRef.current && !animationRef.current) {
-          animationRef.current = lottie.default.loadAnimation({
-            container: containerRef.current,
-            renderer: "svg",
-            loop: true,
-            autoplay: true,
-            path: "/loading.json",
-          });
-        }
-      });
-    }
-
-    return () => {
-      if (animationRef.current) {
-        animationRef.current.destroy();
-        animationRef.current = null;
-      }
-    };
-  }, []);
-
+export default function LottieLoaderClient({ size = 160 }: Props) {
   return (
-    <div
-      ref={containerRef}
-      className={className}
-      style={{ width: size, height: size }}
-      aria-label="로딩 중"
+    <Lottie
+      animationData={animationData}
+      loop
+      autoplay
+      className="block"
+      style={{
+        width: size,
+        height: size,
+      }}
     />
   );
 }

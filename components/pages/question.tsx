@@ -69,17 +69,17 @@ export default function QuestionPage() {
         <div className="bg-white rounded-2xl shadow-lg p-6 max-w-md w-full mb-6 relative animate-fade-in-up delay-100">
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-b-[12px] border-b-white" />
           <h1 className="text-xl font-bold text-aiq-black text-center mb-2">
-            무엇이든 물어보세요!
+            어떤 제품을 찾고 계신가요?
           </h1>
           <p className="text-aiq-gray text-center text-sm">
-            필요한 제품을 입력하면 AI가 답변해/찾아 드립니다.
+            필요한 제품을 입력하시면 AIQ가 여러 기준을 비교해 답변해 드려요.
           </p>
         </div>
 
         <div className="w-full max-w-md animate-fade-in-up delay-200">
           <div className="bg-white rounded-2xl shadow-xl p-4 border border-border transition-all duration-300 focus-within:shadow-2xl focus-within:border-aiq-green/30">
             <Textarea
-              placeholder="예: 200만원대 업무용 노트북 추천해주세요"
+              placeholder="예: 200만원대 업무용 노트북 추천해주세요!"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -88,7 +88,7 @@ export default function QuestionPage() {
             />
             <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
               <span className="text-xs text-aiq-gray">
-                {question.length} / 500
+                {question.length} / 1000
               </span>
               <Button
                 onClick={handleSubmit}
@@ -103,7 +103,7 @@ export default function QuestionPage() {
                 ) : (
                   <span className="flex items-center gap-2">
                     <Send className="w-4 h-4" />
-                    질문하기
+                    AIQ 답변 보러가기
                   </span>
                 )}
               </Button>

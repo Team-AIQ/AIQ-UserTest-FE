@@ -113,7 +113,7 @@ export default function ThankYouPage() {
                             onClick={handleRestart}
                             className="w-full h-12 bg-aiq-green hover:bg-aiq-green-dark text-white font-semibold rounded-xl transition-all"
                         >
-                            다시 테스트하기
+                            처음으로 돌아가기
                         </Button>
                     </div>
                 </div>
