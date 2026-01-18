@@ -34,7 +34,7 @@ export default function ReportPage() {
         isFetched.current = true;
 
         const response = await api.post(
-          `http://localhost:8080/api/ai/synthesize/${questionId}`
+          `http://49.247.139.167:8080/api/ai/synthesize/${questionId}`
         );
 
         const data =

@@ -87,7 +87,7 @@ export default function AnswerPage() {
       const encodedPhonenumber = encodeURIComponent(storedPhonenumber || "");
       const encodedQuestion = encodeURIComponent(storedQuestion);
 
-      const apiUrl = `http://localhost:8080/api/ai/analyze?nickname=${encodedNickname}&phoneNumber=${encodedPhonenumber}&question=${encodedQuestion}`;
+      const apiUrl = `http://49.247.139.167:8080/api/ai/analyze?nickname=${encodedNickname}&phoneNumber=${encodedPhonenumber}&question=${encodedQuestion}`;
 
       const eventSource = new EventSource(apiUrl);
 

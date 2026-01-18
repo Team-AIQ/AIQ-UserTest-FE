@@ -17,7 +17,7 @@ export default function ThankYouPage() {
 
     // axios 인스턴스 설정 (api 에러 해결)
     const api = axios.create({
-        baseURL: "http://localhost:8080",
+        baseURL: "http://49.247.139.167:8080",
         headers: { "Content-Type": "application/json" },
     });
 
